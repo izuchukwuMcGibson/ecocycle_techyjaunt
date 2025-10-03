@@ -5,8 +5,6 @@ const middlewareAuth = require('../middleware/middlewareAuth');
 
 // Household
 router.post('/', middlewareAuth, controllerSubscription.createSubscription);
-
-// Household/Admin
 router.get('/', middlewareAuth, controllerSubscription.getSubscriptions);
 
 // Admin

@@ -7,19 +7,26 @@ exports.createSubscription = async (req, res) => {
       return res.status(403).json({ message: 'Only households can subscribe' });
     }
 
-    const { plan } = req.body;
-    if (!['weekly', 'monthly'].includes(plan)) {
-      return res.status(400).json({ message: 'Plan must be weekly or monthly' });
+    const { plan, category } = req.body;
+    if (!['one-off', 'weekly', 'bi-weekly', 'monthly'].includes(plan)) {
+      return res.status(400).json({ message: 'Plan must be one-off, weekly, bi-weekly or monthly' });
     }
 
-    const duration = plan === 'weekly' ? 7 : 30;
+    // calculate duration
+    let duration = 0;
+    if (plan === 'one-off') duration = 1;
+    if (plan === 'weekly') duration = 7;
+    if (plan === 'bi-weekly') duration = 14;
+    if (plan === 'monthly') duration = 30;
+
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate() + duration);
 
     const subscription = new Subscription({
-      household: req.userId,
+      user: req.userId,
       plan,
+      category: category || 'family',
       startDate,
       endDate
     });
@@ -36,9 +43,9 @@ exports.createSubscription = async (req, res) => {
 exports.getSubscriptions = async (req, res) => {
   try {
     let query = {};
-    if (req.userRole === 'household') query.household = req.userId;
+    if (req.userRole === 'household') query.user = req.userId;
 
-    const subs = await Subscription.find(query).populate('household', 'name email');
+    const subs = await Subscription.find(query).populate('user', 'name email');
     res.json({ subscriptions: subs });
   } catch (err) {
     console.error('getSubscriptions error', err);

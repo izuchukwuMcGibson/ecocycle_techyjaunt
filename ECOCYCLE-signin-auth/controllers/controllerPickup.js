@@ -91,3 +91,36 @@ exports.listPickups = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Driver accepts/rejects pickup
+exports.driverDecision = async (req, res) => {
+  try {
+    if (req.userRole !== 'driver') {
+      return res.status(403).json({ message: 'Only drivers can accept/reject pickups' });
+    }
+
+    const { pickupId, decision } = req.body; // decision = "accept" | "reject"
+    const pickup = await Pickup.findById(pickupId);
+    if (!pickup) return res.status(404).json({ message: 'Pickup not found' });
+
+    if (pickup.status !== 'assigned') {
+      return res.status(400).json({ message: 'Pickup not available for decision' });
+    }
+
+    if (decision === 'accept') {
+      pickup.status = 'in-progress';
+      pickup.driver = req.userId;
+    } else if (decision === 'reject') {
+      pickup.status = 'pending';
+      pickup.driver = null;
+    } else {
+      return res.status(400).json({ message: 'Decision must be accept or reject' });
+    }
+
+    await pickup.save();
+    res.json({ message: `Driver ${decision}ed pickup`, pickup });
+  } catch (err) {
+    console.error('driverDecision error', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

@@ -32,10 +32,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pickups', pickupRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/missed-pickups', missedPickupRoutes);
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+const subscriptionRoutes = require('./routes/routeSubscription');
+const missedPickupRoutes = require('./routes/routeMissedPickup');
+
 
 
