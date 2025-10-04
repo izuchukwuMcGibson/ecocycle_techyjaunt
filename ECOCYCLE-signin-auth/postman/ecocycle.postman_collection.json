@@ -1,0 +1,65 @@
+{
+  "info": {
+    "name": "Ecocycle API",
+    "_postman_id": "12345-abcde",
+    "description": "Postman collection for Ecocycle API testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+"item": [
+    {
+        "name": "User Signup",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "http://localhost:4000/api/auth/signup", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["api","auth","signup"] }
+        }
+    },
+    {
+        "name": "User Login",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "http://localhost:4000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["api","auth","login"] }
+        }
+    },
+    {
+        "name": "Add Driver",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Mike Johnson\",\n  \"vehicle\": \"Truck 14A\",\n  \"license\": \"AB123XYZ\"\n}"
+            },
+            "url": { "raw": "http://localhost:4000/api/drivers/add", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["api","drivers","add"] }
+        }
+    },
+    {
+        "name": "Get All Drivers",
+        "request": {
+            "method": "GET",
+            "url": { "raw": "http://localhost:4000/api/drivers/all", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["api","drivers","all"] }
+        }
+    },
+    {
+        "name": "One-Off Subscription",
+        "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"driverId\": \"DRIVER_ID_HERE\",\n  \"service\": \"Waste Pickup\",\n  \"date\": \"2025-10-05\",\n  \"amount\": 5000\n}"
+            },
+            "url": { "raw": "http://localhost:4000/api/subscriptions/oneoff", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["api","subscriptions","oneoff"] }
+        }
+    }
+]
+}

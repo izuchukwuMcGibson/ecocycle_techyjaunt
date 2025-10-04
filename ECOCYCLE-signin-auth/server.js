@@ -6,10 +6,11 @@ const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/configDb');
 
-const authRoutes = require('./routes/routeAuth');
-const pickupRoutes = require('./routes/routePickup');
-const driverRoutes = require('./routes/routeDriver');
-const subscriptionRoutes = require('./routes/routeSubscription');
+const authRoutes = require('./routes/routeAuth.js');
+const pickupRoutes = require('./routes/routePickup.js');
+const driverRoutes = require('./routes/routeDriver.js');
+const subscriptionRoutes = require('./routes/routeSubscription.js');
+const missedPickupRoutes = require('./routes/routeMissedPickup.js');
 
 
 const app = express();
@@ -38,9 +39,6 @@ app.use('/api/missed-pickups', missedPickupRoutes);
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-
-const subscriptionRoutes = require('./routes/routeSubscription');
-const missedPickupRoutes = require('./routes/routeMissedPickup');
 
 
 

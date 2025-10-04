@@ -1,4 +1,5 @@
-const bcrypt = require('bcrypt');
+// Use bcryptjs (pure-JS) to avoid native-build issues on some systems
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user-schema');
 const Driver = require('../models/driver-schema');
