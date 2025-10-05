@@ -50,10 +50,11 @@ exports.addDriver = async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create driver
-    const newDriver = new Driver({
+    // Use the centralized factory/static to create the correct discriminator
+    const driverDoc = await User.createWithRole({
+      role: 'driver',
       name,
-      email,
+      email: email.toLowerCase(),
       passwordHash,
       phone,
       licenseNumber,
@@ -61,8 +62,8 @@ exports.addDriver = async (req, res) => {
       assignedZone
     });
 
-    await newDriver.save();
-    res.status(201).json(newDriver);
+    await driverDoc.save();
+    res.status(201).json(driverDoc);
   } catch (err) {
     console.error('addDriver error', err);
     res.status(500).json({ error: err.message });
