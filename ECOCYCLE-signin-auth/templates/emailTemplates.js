@@ -39,14 +39,14 @@ export const otpTemplate = (name, otp) => `
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Password Reset OTP | EcoCycle</title>
+  <title>Password Reset Code | EcoCycle</title>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 10px; padding: 30px;">
-    <h2 style="color: #1b5e20; text-align: center;">Password Reset Verification</h2>
+    <h2 style="color: #1b5e20; text-align: center;">Your Password Reset Code</h2>
     <p style="font-size: 15px; color: #333;">
       Hi ${name},<br><br>
-      You requested to reset your EcoCycle account password. Use the OTP code below to verify your request.
+      You requested to reset your EcoCycle password. Use the one-time code below to continue.
     </p>
 
     <div style="text-align: center; margin: 25px 0;">
@@ -57,7 +57,7 @@ export const otpTemplate = (name, otp) => `
     </div>
 
     <p style="font-size: 14px; color: #777;">
-      This OTP will expire in 10 minutes. If you didn’t initiate this request, please ignore this email.
+      This code expires in 10 minutes. Do not share it with anyone. If you didn’t request a password reset, ignore this email.
     </p>
 
     <p style="font-size: 13px; color: #999;">— EcoCycle Security Team</p>
