@@ -128,7 +128,6 @@ exports.verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.emailToken = null;
-    user.emailVerifiedAt = new Date();
     await user.save();
 
     // Optional welcome email
