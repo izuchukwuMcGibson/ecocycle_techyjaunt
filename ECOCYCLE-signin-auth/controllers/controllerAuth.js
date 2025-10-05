@@ -26,11 +26,12 @@ function signToken(user) {
 // ✅ --- SIGNUP (now uses uuidv4 email verification token) ---
 exports.signup = async (req, res) => {
   try {
+    // Require role during signup so the client explicitly chooses account type
     const {
       name,
       email,
       password,
-      role = "household",
+      role,
       phone,
       licenseNumber,
       vehicleId,
@@ -39,10 +40,18 @@ exports.signup = async (req, res) => {
       department,
     } = req.body;
 
-    if (!name || !email || !password)
+    // Basic validation: require name, email, password and role
+    if (!name || !email || !password || !role)
       return res
         .status(400)
-        .json({ message: "Name, email and password required" });
+        .json({ message: "Name, email, password and role are required. Role must be one of: household, driver, admin" });
+
+    // Normalize role and validate allowed values
+    const allowedRoles = ['household', 'driver', 'admin'];
+    const roleNormalized = String(role).toLowerCase();
+    if (!allowedRoles.includes(roleNormalized)) {
+      return res.status(400).json({ message: `Invalid role. Allowed: ${allowedRoles.join(', ')}` });
+    }
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing)
@@ -52,40 +61,30 @@ exports.signup = async (req, res) => {
     const emailToken = uuidv4();
     let user;
 
-    if (role === "driver") {
-      if (!licenseNumber)
-        return res
-          .status(400)
-          .json({ message: "Driver must include licenseNumber" });
-      user = new Driver({
-        name,
-        email: email.toLowerCase(),
-        passwordHash,
-        phone,
-        licenseNumber,
-        vehicleId,
-        assignedZone,
-        emailToken,
-      });
-    } else if (role === "admin") {
-      user = new Admin({
-        name,
-        email: email.toLowerCase(),
-        passwordHash,
-        phone,
-        permissions,
-        department,
-        emailToken,
-      });
-    } else {
-      user = new User({
-        name,
-        email: email.toLowerCase(),
-        passwordHash,
-        phone,
-        emailToken,
-      });
+    // Create the appropriate discriminator document using the centralized helper
+    // This ensures any new user created anywhere in the code uses the same
+    // discriminator logic and prevents duplication.
+    const userData = {
+      role: roleNormalized,
+      name,
+      email: email.toLowerCase(),
+      passwordHash,
+      phone,
+      emailToken,
+      // include optional role-specific fields (if present)
+      licenseNumber,
+      vehicleId,
+      assignedZone,
+      permissions,
+      department
+    };
+
+    // Validate driver-specific requirement before creation
+    if (roleNormalized === 'driver' && !licenseNumber) {
+      return res.status(400).json({ message: 'Driver must include licenseNumber' });
     }
+
+    user = await User.createWithRole(userData);
 
     await user.save();
 
