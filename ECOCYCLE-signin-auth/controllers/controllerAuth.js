@@ -61,9 +61,6 @@ exports.signup = async (req, res) => {
     const emailToken = uuidv4();
     let user;
 
-    // Create the appropriate discriminator document using the centralized helper
-    // This ensures any new user created anywhere in the code uses the same
-    // discriminator logic and prevents duplication.
     const userData = {
       role: roleNormalized,
       name,
@@ -71,7 +68,6 @@ exports.signup = async (req, res) => {
       passwordHash,
       phone,
       emailToken,
-      // include optional role-specific fields (if present)
       licenseNumber,
       vehicleId,
       assignedZone,
