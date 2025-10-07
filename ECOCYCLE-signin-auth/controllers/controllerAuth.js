@@ -61,13 +61,17 @@ exports.signup = async (req, res) => {
     const emailToken = uuidv4();
     let user;
 
-    // Build base user data (exclude role if it is the base discriminator "household")
+    // Create the appropriate discriminator document using the centralized helper
+    // This ensures any new user created anywhere in the code uses the same
+    // discriminator logic and prevents duplication.
     const userData = {
+      role: roleNormalized,
       name,
       email: email.toLowerCase(),
       passwordHash,
       phone,
       emailToken,
+      // include optional role-specific fields (if present)
       licenseNumber,
       vehicleId,
       assignedZone,
@@ -80,16 +84,9 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Driver must include licenseNumber' });
     }
 
-    // Pick correct model based on discriminator; "household" uses base User model
-    const modelMap = { driver: Driver, admin: Admin };
-    const Model = modelMap[roleNormalized] || User;
+    user = await User.createWithRole(userData);
 
-    // Only set role if it's a registered discriminator to avoid "Discriminator not found" error
-    if (roleNormalized !== 'household') {
-      userData.role = roleNormalized;
-    }
-
-    user = await Model.create(userData);
+    await user.save();
 
     // 🔹 Send verification email (now with UUID token)
     await sendTemplateEmail(
@@ -111,8 +108,10 @@ exports.signup = async (req, res) => {
       token,
     });
   } catch (err) {
-    console.error("signup error", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("signup error", err && (err.stack || err));
+    // return a helpful message in development, but keep generic in production
+    const msg = process.env.NODE_ENV === 'production' ? 'Server error' : (err.message || 'Server error');
+    res.status(500).json({ message: msg });
   }
 };
 
@@ -130,6 +129,7 @@ exports.verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.emailToken = null;
+    user.emailVerifiedAt = new Date();
     await user.save();
 
     // Optional welcome email
