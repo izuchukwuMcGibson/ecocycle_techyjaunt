@@ -241,10 +241,8 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { email, newPassword, confirmPassword } = req.body;
-    const { userId } = req.params;
-    if (!userId) {
-      return res.status(400).json({ message: "userId required" });
-    }
+    // userId param is optional now; old routes may include it but we don't require it
+    const { userId } = req.params || {};
     if (!email || !newPassword || !confirmPassword)
       return res
         .status(400)

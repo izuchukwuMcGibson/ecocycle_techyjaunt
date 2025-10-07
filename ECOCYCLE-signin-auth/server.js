@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/configDb');
@@ -22,6 +23,8 @@ connectDB();
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
+// Allow cross-origin requests during development. In production restrict origin as needed.
+app.use(cors());
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 60 * 1000, max: 30 });

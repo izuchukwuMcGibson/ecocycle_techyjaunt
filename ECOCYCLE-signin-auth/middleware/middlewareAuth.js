@@ -12,7 +12,18 @@ module.exports = (req, res, next) => {
   if (!/^Bearer$/i.test(scheme)) return res.status(401).json({ message: 'Bad token format' });
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ message: 'Token invalid or expired' });
+    if (err) {
+      // Distinguish between expired tokens and other verification errors to help
+      // debugging. Keep messages generic in production if desired.
+      if (err.name === 'TokenExpiredError') {
+        console.warn('Auth middleware: token expired');
+        return res.status(401).json({ message: 'Token expired' });
+      }
+      console.warn('Auth middleware: token invalid', err && err.message);
+      return res.status(401).json({ message: 'Token invalid' });
+    }
+
+    // Attach common user info from token to the request
     req.userId = decoded.sub;
     req.userEmail = decoded.email;
     req.userRole = decoded.role;
