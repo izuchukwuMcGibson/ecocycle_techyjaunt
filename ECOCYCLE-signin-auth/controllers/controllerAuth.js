@@ -61,17 +61,13 @@ exports.signup = async (req, res) => {
     const emailToken = uuidv4();
     let user;
 
-    // Create the appropriate discriminator document using the centralized helper
-    // This ensures any new user created anywhere in the code uses the same
-    // discriminator logic and prevents duplication.
+    // Build base user data (exclude role if it is the base discriminator "household")
     const userData = {
-      role: roleNormalized,
       name,
       email: email.toLowerCase(),
       passwordHash,
       phone,
       emailToken,
-      // include optional role-specific fields (if present)
       licenseNumber,
       vehicleId,
       assignedZone,
@@ -84,9 +80,16 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Driver must include licenseNumber' });
     }
 
-    user = await User.createWithRole(userData);
+    // Pick correct model based on discriminator; "household" uses base User model
+    const modelMap = { driver: Driver, admin: Admin };
+    const Model = modelMap[roleNormalized] || User;
 
-    await user.save();
+    // Only set role if it's a registered discriminator to avoid "Discriminator not found" error
+    if (roleNormalized !== 'household') {
+      userData.role = roleNormalized;
+    }
+
+    user = await Model.create(userData);
 
     // 🔹 Send verification email (now with UUID token)
     await sendTemplateEmail(
@@ -127,7 +130,6 @@ exports.verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.emailToken = null;
-    user.emailVerifiedAt = new Date();
     await user.save();
 
     // Optional welcome email

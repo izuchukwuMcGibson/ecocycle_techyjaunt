@@ -28,13 +28,10 @@ UserSchema.pre('validate', function(next) {
   next();
 });
 
-module.exports = mongoose.model('User', UserSchema);
-
-// Static helper to create the correct discriminator document based on role.
-// Usage: User.createWithRole({ role: 'driver', name: 'Bob', ... })
-// This function ensures the appropriate discriminator model (driver/admin)
-// is used so schema-specific fields are validated.
-mongoose.model('User').schema.statics.createWithRole = async function(data) {
+// Static helper attached to the schema to create the correct discriminator
+// document based on role. Attach to schema before compiling the model so
+// the static is available on the compiled model.
+UserSchema.statics.createWithRole = async function(data) {
   const role = (data.role || 'household').toLowerCase();
   // Ensure discriminator models are registered by requiring their files
   try {
@@ -53,5 +50,7 @@ mongoose.model('User').schema.statics.createWithRole = async function(data) {
     return new Admin(data);
   }
   // default household user
-  return new (mongoose.model('User'))(data);
+  return new this(data);
 };
+
+module.exports = mongoose.model('User', UserSchema);
