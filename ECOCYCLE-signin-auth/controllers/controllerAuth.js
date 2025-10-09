@@ -115,37 +115,6 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.verifyEmail = async (req, res) => {
-  try {
-    const token = req.params.token;
-    if (!token)
-      return res.status(400).json({ message: "Verification token required" });
-
-    const user = await User.findOne({ emailToken: token });
-    if (!user)
-      return res.status(400).json({ message: "Invalid or expired token" });
-    if (user.isVerified)
-      return res.status(200).json({ message: "Email already verified" });
-
-    user.isVerified = true;
-    user.emailToken = null;
-    user.emailVerifiedAt = new Date();
-    await user.save();
-
-    // Optional welcome email
-    await sendTemplateEmail(
-      user.email,
-      "Welcome to Ecocycle",
-      welcomeTemplate(user.name),
-      `Welcome ${user.name}! Your email has been verified successfully.`
-    );
-
-    res.json({ message: "Email verified successfully" });
-  } catch (err) {
-    console.error("verifyEmail error", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 exports.verifyOtp = async (req, res) => {
   try {
@@ -180,10 +149,6 @@ exports.signin = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-    if (!user.isVerified)
-      return res
-        .status(403)
-        .json({ message: "Please verify your email first" });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ message: "Invalid credentials" });
